@@ -23,8 +23,10 @@ import se.anyro.nfc_reader.record.SmartPoster;
 import se.anyro.nfc_reader.record.TextRecord;
 import se.anyro.nfc_reader.record.UriRecord;
 import android.app.Activity;
+import android.graphics.Color;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +50,7 @@ public class NdefMessageParser {
     public static List<ParsedNdefRecord> getRecords(NdefRecord[] records) {
         List<ParsedNdefRecord> elements = new ArrayList<ParsedNdefRecord>();
         for (final NdefRecord record : records) {
+
             if (UriRecord.isUri(record)) {
                 elements.add(UriRecord.parse(record));
             } else if (TextRecord.isText(record)) {
@@ -60,6 +63,7 @@ public class NdefMessageParser {
 					public View getView(Activity activity, LayoutInflater inflater, ViewGroup parent, int offset) {
 				        TextView text = (TextView) inflater.inflate(R.layout.tag_text, parent, false);
 				        text.setText(new String(record.getPayload()));
+				        text.setTextColor(Color.WHITE);
 				        return text;
 					}
             		

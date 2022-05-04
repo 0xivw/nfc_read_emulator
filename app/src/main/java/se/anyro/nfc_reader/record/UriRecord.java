@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.net.Uri;
 import android.nfc.NdefRecord;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -112,7 +113,10 @@ public class UriRecord implements ParsedNdefRecord {
      *         containing a URI.
      */
     public static UriRecord parse(NdefRecord record) {
+        String w  = new String(record.getPayload());
+        Log.d("www--: ",w);
         short tnf = record.getTnf();
+        Log.d("tnf","fd "+tnf);
         if (tnf == NdefRecord.TNF_WELL_KNOWN) {
             return parseWellKnown(record);
         } else if (tnf == NdefRecord.TNF_ABSOLUTE_URI) {
@@ -125,6 +129,7 @@ public class UriRecord implements ParsedNdefRecord {
     private static UriRecord parseAbsolute(NdefRecord record) {
         byte[] payload = record.getPayload();
         Uri uri = Uri.parse(new String(payload, Charset.forName("UTF-8")));
+
         return new UriRecord(uri);
     }
 
@@ -143,7 +148,33 @@ public class UriRecord implements ParsedNdefRecord {
         byte[] fullUri =
             Bytes.concat(prefix.getBytes(Charset.forName("UTF-8")), Arrays.copyOfRange(payload, 1,
                 payload.length));
-        Uri uri = Uri.parse(new String(fullUri, Charset.forName("UTF-8")));
+        byte[] finalUri = new byte[fullUri.length];
+        int check_for_upper = 1;
+        for(int i = 0; i < fullUri.length;i++){
+            Log.d("At "+i, Character.toString((char)fullUri[i]));
+            if(Character.toString((char)fullUri[i]).equals("#") || Character.toString((char)fullUri[i]).equals("&") || Character.toString((char)fullUri[i]).equals("?") ){
+                Log.d("check","k vai day");
+                finalUri[i] = '\n';
+            }
+            else if(Character.toString((char)fullUri[i]).equals("=")){
+                finalUri[i] = ':';
+            }
+            else{
+                finalUri[i] = fullUri[i];
+            }
+        }
+        for(int i = 0; i < fullUri.length;i++){
+            if(check_for_upper == 1){
+                finalUri[i] = (byte) Character.toUpperCase(finalUri[i]);
+                check_for_upper = 0;
+            }
+            if(Character.toString((char)finalUri[i]).equals("\n")){
+                Log.d("hehehe","hehehe");
+                check_for_upper = 1;
+            }
+        }
+        Log.d("1111111111111",new String(finalUri, Charset.forName("UTF-8")));
+        Uri uri = Uri.parse(new String(finalUri, Charset.forName("UTF-8")));
         return new UriRecord(uri);
     }
 

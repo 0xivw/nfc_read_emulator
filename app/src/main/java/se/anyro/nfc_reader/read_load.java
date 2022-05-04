@@ -151,11 +151,13 @@ public class read_load extends AppCompatActivity {
                 || NfcAdapter.ACTION_TECH_DISCOVERED.equals(action)
                 || NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
             Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
             NdefMessage[] msgs;
             if (rawMsgs != null) {
                 msgs = new NdefMessage[rawMsgs.length];
                 for (int i = 0; i < rawMsgs.length; i++) {
                     msgs[i] = (NdefMessage) rawMsgs[i];
+
                 }
             } else {
                 // Unknown tag type
@@ -169,6 +171,7 @@ public class read_load extends AppCompatActivity {
                 mTags.add(tag);
             }
             // Setup the views
+            Log.d("############",msgs.toString());
             buildTagViews(msgs);
         }
     }
@@ -260,7 +263,6 @@ public class read_load extends AppCompatActivity {
         Parcel oParcel = Parcel.obtain();
         oTag.writeToParcel(oParcel, 0);
         oParcel.setDataPosition(0);
-
         int len = oParcel.readInt();
         byte[] id = null;
         if (len >= 0) {
@@ -395,19 +397,23 @@ public class read_load extends AppCompatActivity {
         }
         LayoutInflater inflater = LayoutInflater.from(this);
         LinearLayout content = mTagContent;
-
+//        String ew = new String(msgs[0].getRecords()[0].getPayload());
+//        Log.d("%%%%%%%%%%%%%%%",ew);
         // Parse the first message in the list
         // Build views for all of the sub records
         Date now = new Date();
         List<ParsedNdefRecord> records = NdefMessageParser.parse(msgs[0]);
         final int size = records.size();
+        Log.d("gia tri: ","aa "+size);
         for (int i = 0; i < size; i++) {
             TextView timeView = new TextView(this);
             timeView.setText(TIME_FORMAT.format(now));
             content.addView(timeView, 0);
             ParsedNdefRecord record = records.get(i);
+            Log.d("-------------",record.toString());
             content.addView(record.getView(this, inflater, content, i), 1 + i);
             content.addView(inflater.inflate(R.layout.tag_divider, content, false), 2 + i);
+            content.setBackgroundColor(-1);
         }
     }
 
